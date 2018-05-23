@@ -260,14 +260,7 @@ class WKWebView extends React.Component {
     /**
      * A Boolean value that sets whether diagonal scrolling is allowed.
     */
-    directionalLockEnabled: PropTypes.bool,
-    /**
-     * A Boolean value that allows oauth login in the webview. This works by using a second
-     * wkwebview that appears above the first. Based on @dthulke's answer at
-     * https://stackoverflow.com/questions/8025082/facebook-authentication-in-a-uiwebview-does-not-redirect-back-to-original-page-o
-     * This is incompatible with the openNewWindowInWebview prop.
-     */
-    allowOAuthLogin: PropTypes.bool
+    directionalLockEnabled: PropTypes.bool
   };
 
   state = {
@@ -363,7 +356,6 @@ class WKWebView extends React.Component {
         onShouldStartLoadWithRequest={onShouldStartLoadWithRequest}
         pagingEnabled={this.props.pagingEnabled}
         directionalLockEnabled={this.props.directionalLockEnabled}
-        allowOAuthLogin={this.props.allowOAuthLogin}
       />;
 
     return (
