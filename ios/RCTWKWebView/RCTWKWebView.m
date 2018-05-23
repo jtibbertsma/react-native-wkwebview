@@ -70,6 +70,9 @@ RCT_NOT_IMPLEMENTED(- (instancetype)initWithCoder:(NSCoder *)aDecoder)
     [userController addScriptMessageHandler:[[WeakScriptMessageDelegate alloc] initWithDelegate:self] name:@"reactNative"];
     config.userContentController = userController;
 
+    NSLog(@"init");
+    NSLog(@"%@", _allowOAuthLogin);
+
     // Allow oauth popups by using a second webview instance
     _popupWebview = nil;
     if (_allowOAuthLogin) {
@@ -535,6 +538,8 @@ RCT_NOT_IMPLEMENTED(- (instancetype)initWithCoder:(NSCoder *)aDecoder)
 
 - (void)webView:(WKWebView *)webView didFinishNavigation:(__unused WKNavigation *)navigation
 {
+  NSLog(@"didFinishNavigation");
+  NSLog(@"%@", _allowOAuthLogin);
   // if the main webView loads a new page (e.g. due to succesful facebook login)
   // remove the popup
   if (_popupWebview != nil) {
@@ -594,25 +599,28 @@ RCT_NOT_IMPLEMENTED(- (instancetype)initWithCoder:(NSCoder *)aDecoder)
 
 - (WKWebView *)webView:(WKWebView *)webView createWebViewWithConfiguration:(WKWebViewConfiguration *)configuration forNavigationAction:(WKNavigationAction *)navigationAction windowFeatures:(WKWindowFeatures *)windowFeatures
 {
-    NSString *scheme = navigationAction.request.URL.scheme;
-    if ((navigationAction.targetFrame.isMainFrame || _openNewWindowInWebView) && ([scheme isEqualToString:@"http"] || [scheme isEqualToString:@"https"])) {
-      if (_allowOAuthLogin) {
-        _popupWebview = [[WKWebView alloc] initWithFrame:self.bounds configuration:configuration];
-        _popupWebview.UIDelegate = self;
-        _popupWebview.navigationDelegate = self;
-        _popupWebview.scrollView.delegate = self;
-        return _popupWebview;
-      } else {
-        [webView loadRequest:navigationAction.request];
-      }
+  NSLog(@"createWebViewWithConfiguration");
+  NSString *scheme = navigationAction.request.URL.scheme;
+  NSLog(@"%@", scheme);
+  NSLog(@"%@", _allowOAuthLogin);
+  if ((navigationAction.targetFrame.isMainFrame || _openNewWindowInWebView) && ([scheme isEqualToString:@"http"] || [scheme isEqualToString:@"https"])) {
+    if (_allowOAuthLogin) {
+      _popupWebview = [[WKWebView alloc] initWithFrame:self.bounds configuration:configuration];
+      _popupWebview.UIDelegate = self;
+      _popupWebview.navigationDelegate = self;
+      _popupWebview.scrollView.delegate = self;
+      return _popupWebview;
     } else {
-      UIApplication *app = [UIApplication sharedApplication];
-      NSURL *url = navigationAction.request.URL;
-      if ([app canOpenURL:url]) {
-        [app openURL:url];
-      }
+      [webView loadRequest:navigationAction.request];
     }
-    return nil;
+  } else {
+    UIApplication *app = [UIApplication sharedApplication];
+    NSURL *url = navigationAction.request.URL;
+    if ([app canOpenURL:url]) {
+      [app openURL:url];
+    }
+  }
+  return nil;
 }
 
 - (void)webViewWebContentProcessDidTerminate:(WKWebView *)webView
