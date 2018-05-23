@@ -535,6 +535,12 @@ RCT_NOT_IMPLEMENTED(- (instancetype)initWithCoder:(NSCoder *)aDecoder)
 
 - (void)webView:(WKWebView *)webView didFinishNavigation:(__unused WKNavigation *)navigation
 {
+  // if the main webView loads a new page (e.g. due to succesful facebook login)
+  // remove the popup
+  if (_popupWebview != nil) {
+    [_popupWebview removeFromSuperview];
+    _popupWebview = nil;
+  }
   // we only need the final 'finishLoad' call so only fire the event when we're actually done loading.
   if (_onLoadingFinish && !webView.loading && ![webView.URL.absoluteString isEqualToString:@"about:blank"]) {
     _onLoadingFinish([self baseEvent]);
@@ -591,7 +597,7 @@ RCT_NOT_IMPLEMENTED(- (instancetype)initWithCoder:(NSCoder *)aDecoder)
     NSString *scheme = navigationAction.request.URL.scheme;
     if ((navigationAction.targetFrame.isMainFrame || _openNewWindowInWebView) && ([scheme isEqualToString:@"http"] || [scheme isEqualToString:@"https"])) {
       if (_allowOAuthLogin) {
-        _popupWebview = [[WKWebView alloc] initWithFrame:self.bounds configuration:config];
+        _popupWebview = [[WKWebView alloc] initWithFrame:self.bounds configuration:configuration];
         _popupWebview.UIDelegate = self;
         _popupWebview.navigationDelegate = self;
         _popupWebview.scrollView.delegate = self;
@@ -607,16 +613,6 @@ RCT_NOT_IMPLEMENTED(- (instancetype)initWithCoder:(NSCoder *)aDecoder)
       }
     }
     return nil;
-}
-
-- (void)webView:(WKWebView *)webView didFinishNavigation:(WKNavigation *)navigation
-{
-  // if the main webView loads a new page (e.g. due to succesful facebook login)
-  // remove the popup
-  if (_popupWebview != nil) {
-    [_popupWebview removeFromSuperview];
-    _popupWebview = nil;
-  }
 }
 
 - (void)webViewWebContentProcessDidTerminate:(WKWebView *)webView
