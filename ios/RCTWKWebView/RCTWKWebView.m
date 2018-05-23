@@ -536,6 +536,7 @@ RCT_NOT_IMPLEMENTED(- (instancetype)initWithCoder:(NSCoder *)aDecoder)
   // if the main webView loads a new page (e.g. due to succesful facebook login)
   // remove the popup
   if (_popupWebview != nil) {
+    NSLog(@"REMOVING POPUP WEBVIEW");
     [_popupWebview removeFromSuperview];
     _popupWebview = nil;
   }
